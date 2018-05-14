@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 from __future__ import print_function, unicode_literals
 from base64 import b64encode,b64decode
 from datetime import datetime
@@ -38,7 +40,7 @@ def pair(config):
     data = { 'scope' :  [ "read", "write", "control"] }
     data['device']  = getDeviceSpecJson(config)
     print("Starting pairing request")
-    r = requests.post("https://" + config['address'] + ":1926/6/pair/request", json=data, verify=False)
+    r = requests.post("https://" + config['address'] + ":1926/5/pair/request", json=data, verify=False)
     response = r.json()
     auth_Timestamp = response["timestamp"]
     config['auth_key'] = response["auth_key"]
@@ -56,7 +58,7 @@ def pair(config):
     grant_request['device']  = getDeviceSpecJson(config)
 
     print("Attempting to pair")
-    r = requests.post("https://" + config['address'] +":1926/6/pair/grant", json=grant_request, verify=False,auth=HTTPDigestAuth(config['device_id'], config['auth_key']))
+    r = requests.post("https://" + config['address'] +":1926/5/pair/grant", json=grant_request, verify=False,auth=HTTPDigestAuth(config['device_id'], config['auth_key']))
     print(r.json())
     print("Username for subsequent calls is: " + config['device_id'])
     print("Password for subsequent calls is: " + config['auth_key'])
@@ -78,9 +80,9 @@ def main():
     config={}
     parser = argparse.ArgumentParser(description='Control a HuaFan WifiSwitch.')
     parser.add_argument("--host", dest='host', help="Host/address of the TV")
-    parser.add_argument("--user", dest='user', help="Username")
-    parser.add_argument("--pass", dest='password', help="Password")
-    parser.add_argument("command",  help="Command to run (pair/get_volume/get/standby)")
+    parser.add_argument("-u", "--user", dest='user', help="Username")
+    parser.add_argument("-p", "--pass", dest='password', help="Password")
+    parser.add_argument("command",  help="Command to run (pair/get_channel/get_applications/get_volume/get_powerstate/get/standby)")
 
     args = parser.parse_args()
 
@@ -92,31 +94,58 @@ def main():
     config['device_id'] = args.user
     config['auth_key'] = args.password
 
+    if args.command == "get_channel":
+        config['path'] = "5/channeldb/tv"
+        get_command(config)
+
+    if args.command == "get_applications":
+        config['path'] = "5/applications"
+        get_command(config)
+
     if args.command == "get_volume":
-        config['path'] = "6/audio/volume"
+        config['path'] = "5/audio/volume"
+        get_command(config)
+
+    if args.command == "get_powerstate":
+        config['path'] = "5/powerstate"
+        get_command(config)
+
+    if args.command == "get_ambilight_topology":
+        config['path'] = "5/ambilight/topology"
+        get_command(config)
+
+    if args.command == "get_ambilight_mode":
+        config['path'] = "5/ambilight/mode"
+        get_command(config)
+
+    if args.command == "get_ambilight_measured":
+        config['path'] = "5/ambilight/measured"
+        get_command(config)
+
+    if args.command == "get_ambilight_processed":
+        config['path'] = "5/ambilight/processed"
+        get_command(config)
+
+    if args.command == "get_ambilight_cached":
+        config['path'] = "5/ambilight/cached"
         get_command(config)
 
     if args.command == "get":
         # All working commands
-        config['path'] = "6/channeldb/tv"
-        config['path'] = "6/applications"
-        config['path'] = "6/ambilight/mode"
-        config['path'] = "6/ambilight/topology"
-        config['path'] = "6/recordings/list"
-        config['path'] = "6/powerstate"
-        config['path'] = "6/ambilight/currentconfiguration"
-        config['path'] = "6/channeldb/tv/channelLists/all"
-        config['path'] = "6/system/epgsource"
-        config['path'] = "6/system"
-        config['path'] = "6/system/storage"
-        config['path'] = "6/system/timestamp"
-        config['path'] = "6/menuitems/settings/structure"
-        config['path'] = "6/ambilight/cached"
+                 
+        config['path'] = "5/recordings/list"
+        config['path'] = "5/ambilight/currentconfiguration"
+        config['path'] = "5/channeldb/tv/channelLists/all"
+        config['path'] = "5/system/epgsource"
+        config['path'] = "5/system"
+        config['path'] = "5/system/storage"
+        config['path'] = "5/system/timestamp"
+        config['path'] = "5/menuitems/settings/structure"
       
         get_command(config)
 
     if args.command == "standby":
-        config['path'] = "6/input/key"
+        config['path'] = "5/input/key"
         config['body'] = { "key" : "Standby" }
         post_command(config)
 
