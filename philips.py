@@ -78,11 +78,11 @@ def post_command(config):
 
 def main():
     config={}
-    parser = argparse.ArgumentParser(description='Control a HuaFan WifiSwitch.')
+    parser = argparse.ArgumentParser(add_help = False, description='Control a Philips Android TV.')
     parser.add_argument("--host", dest='host', help="Host/address of the TV")
     parser.add_argument("-u", "--user", dest='user', help="Username")
     parser.add_argument("-p", "--pass", dest='password', help="Password")
-    parser.add_argument("command",  help="Command to run (pair/get_channel/get_applications/get_volume/get_powerstate/get/standby)")
+    parser.add_argument("command",  help="Command to run (post/get)")
 
     args = parser.parse_args()
 
@@ -130,6 +130,10 @@ def main():
         config['path'] = "5/ambilight/cached"
         get_command(config)
 
+    if args.command == "get_audio":
+        config['path'] = "5/audio/volume"
+        get_command(config)
+
     if args.command == "get":
         # All working commands
                  
@@ -149,6 +153,22 @@ def main():
         config['body'] = { "key" : "Standby" }
         post_command(config)
 
+    if args.command == "online":
+        config['path'] = "5/imput/key"
+        config['body'] = { "key" : "Online" }
+        post_command(config)
+  
+    if args.command == "volumeup":
+        config['path'] = "5/input/key"
+        config['body'] = { "key" : "VolumeUp" }
+        post_command(config)
+
+
+    if args.command == "mute":
+        config['path'] = "5/input/key"
+        config['body'] = { "key" : "Mute" }
+        post_command(config)
+    
 main()
 
 
