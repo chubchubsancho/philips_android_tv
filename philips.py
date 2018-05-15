@@ -33,6 +33,11 @@ def getDeviceSpecJson(config):
     device_spec['id'] = config['device_id']
     return device_spec
 
+def getDeviceApiVersion(config):
+    r = requests.get("https://" + config['address'] +":1926/system", verify=False,auth=HTTPDigestAuth(config['device_id'], config['auth_key']))
+    api = r.json()
+    api_version = api['api_version']['Major']
+    return api_version
 
 def pair(config):
     config['application_id'] = "app.id"
@@ -70,6 +75,14 @@ def get_command(config):
     print(r.text)
     print(r.json())
 
+def get_generic_command(config):
+    api_version = getDeviceApiVersion(config)
+    r = requests.get("https://" + config['address'] + ":1926/" + str(api_version) + "/" + config['path'], verify=False, auth=HTTPDigestAuth(config['device_id'], config['auth_key']))
+    print(r)
+    print(r.url)
+    print(r.text)
+    print(r.json())
+
 
 def post_command(config):
     r = requests.post("https://" + config['address'] + ":1926/" + config['path'], json=config['body'], verify=False,auth=HTTPDigestAuth(config['device_id'], config['auth_key']))
@@ -93,6 +106,15 @@ def main():
 
     config['device_id'] = args.user
     config['auth_key'] = args.password
+
+    if args.command == "test":
+        config['path'] = "system"
+        get_generic_command(config)
+
+    if args.command == "system":
+        config['path'] = "system"
+        rsystem = get_command(config)
+        print(rsystem)
 
     if args.command == "get_channel":
         config['path'] = "5/channeldb/tv"
